@@ -11,5 +11,3 @@ const connectDB = async (uri) => {
 };
 
 module.exports = connectDB;
-//mongodb+srv://root:<db_password>@cluster-1.ivcb7.mongodb.net/
-// NqYBTTuNZBOsVfk8

@@ -13,13 +13,13 @@ app.get('/',  (req, res) => {
     return res.json("Hello backend ...");
 });
 
-app.use("/api/auth", require("./routes/auth.routes"));
+app.use("/auth", require("./routes/auth.routes"));
 app.use("/api", require("./routes/user.routes")); 
-app.use("/api", require("./routes/product.routes")); 
+app.use("/api", require("./routes/category-blog.routes")); 
 
 
 module.exports = app;
 
 app.listen(5000, () => {
-    console.log(process.env.MONGO_URI)
+    console.log('running in 5000')
 });

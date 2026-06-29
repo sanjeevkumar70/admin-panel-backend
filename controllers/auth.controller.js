@@ -20,19 +20,30 @@ exports.register = async (req, res) => {
 //    "email": "",
 //    "role": ""
 // }
-
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user || !(await bcrypt.compare(password, user?.password)))
-    return res.status(401).json({ message: "Invalid credentials" });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
-  res.json(
-    {
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    res.json({
       success: true,
       data: user,
-      token: generateToken(user._id, user.role)
+      token: generateToken(user._id, user.role),
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err.message);
+  }
 };
 
 // payload
