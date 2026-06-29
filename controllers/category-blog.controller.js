@@ -2,15 +2,20 @@ const CategoryModal = require("../models/CategoryBlog");
 
 exports.createCategoryBlog = async (req, res) => {
   try {
-    const { name, slug, status } = req.body;
+    const { name, status } = req.body;
 
-    // Basic validation
-    if (!name || !slug || status === undefined) {
+    if (!name || status === undefined) {
       return res.status(400).json({
         success: false,
-        message: "Category name, slug, and status are required",
+        message: "Category name and status are required",
       });
     }
+
+    // Generate slug from name
+    const slug = name
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-");
 
     // Check duplicate category
     const existingCategoryBlog = await CategoryModal.findOne({
@@ -54,31 +59,47 @@ exports.getCategoryBlog = async (req, res) => {
 
 exports.updateCategoryBlog = async (req, res) => {
   try {
-    const { id } = req.params; // get id from params
+    const { id } = req.params;
+    const { name, status } = req.body;
+
     const category = await CategoryModal.findById(id);
 
     if (!category) {
       return res.status(404).json({
         success: false,
-        message: "Category not found"
+        message: "Category not found",
       });
     }
-    // Update fields
-    Object.assign(category, req.body);
+
+    // Update name and slug
+    if (name) {
+      category.name = name;
+
+      category.slug = name
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "") // Remove special characters
+        .replace(/\s+/g, "-")     // Replace spaces with -
+        .replace(/-+/g, "-");     // Remove multiple dashes
+    }
+
+    // Update status
+    if (typeof status !== "undefined") {
+      category.status = status;
+    }
 
     await category.save();
 
     return res.status(200).json({
       success: true,
       message: "Category updated successfully",
-      data: category
+      data: category,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Error updating Category",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -87,27 +108,25 @@ exports.deleteCategoryBlog = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deletedCategory = await Product.findByIdAndDelete(id);
+    const deletedCategory = await CategoryModal.findByIdAndDelete(id);
 
     if (!deletedCategory) {
       return res.status(404).json({
         success: false,
-        message: "Category not found"
+        message: "Category not found",
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Category deleted successfully",
-      data: deletedCategory
+      data: deletedCategory,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Error deleting Category",
-      error: error.message
+      error: error.message,
     });
   }
 };
-
